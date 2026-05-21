@@ -120,7 +120,7 @@
         <div class="contact-bg-icon">
             <span class="material-symbols-outlined">mail</span>
         </div>
-        <form id="contact-form">
+        <form id="contact-form" @submit.prevent="submitForm">
             <h2 class="contact-text-1 section-title ink-bleed mb-3">
                 Let's start a conversation
             </h2>
@@ -142,7 +142,7 @@
                     <label for="message" class="contact-label">Message</label>
                     <textarea v-model="message" id="message" class="contact-input" rows="4"></textarea>
                 </div>
-                <button class="btn-primary-custom" type="submit" onclick="location.href='#landing'">
+                <button class="btn-primary-custom" type="submit">
                     {{isLoading ? "Sending..." : "Send Message"}}
                     <span class="material-symbols-outlined">send</span>
                 </button>
