@@ -19,10 +19,10 @@
 
     const submitForm = async() => {
 
-        // if(!recaptchaToken.value) {
-        //     notyf.error('Please verify that you are not a robot.');
-        //     return;
-        // }
+        if(!recaptchaToken.value) {
+            notyf.error('Please verify that you are not a robot.');
+            return;
+        }
 
         isLoading.value = true;
 
@@ -57,12 +57,62 @@
 
             isLoading.value = false;
             notyf.error("Failed to send message");
-        }
-        // } finally {
+        } finally {
 
-        //     resetRecaptcha();
-        // }
+            resetRecaptcha();
+        }
     }
+
+    /*recaptcha integration*/
+
+    const SITE_KEY = '6LcpMvUsAAAAAE2z6OEh7jMZe_Yo3zp1ieU1VxhJ';
+
+    const recaptchaContainer = ref(null);
+    const recaptchaWidgetId = ref(null);
+    const recaptchaToken = ref('');
+
+
+    function onRecaptchaSuccess(token) {
+        recaptchaToken.value = token;
+    }
+
+    function onRecaptchaExpired() {
+        recaptchaToken.value = '';
+    }
+
+    function renderRecaptcha() {
+        if(!window.grecaptcha) {
+            console.error('reCAPTCHA not loaded');
+            return;
+        }
+
+        recaptchaWidgetId.value = window.grecaptcha.render(recaptchaContainer.value, {
+            sitekey: SITE_KEY,
+            size: 'normal',
+            callback: onRecaptchaSuccess,
+            'expired-callback': onRecaptchaExpired
+        });
+    }
+
+    function resetRecaptcha() {
+        if(recaptchaWidgetId.value !== null) {
+            window.grecaptcha.reset(recaptchaWidgetId.value);
+            recaptchaToken.value = '';
+        }
+    }
+
+    onMounted(() => {
+        const interval = setInterval(() => {
+            if(window.grecaptcha && window.grecaptcha.render) {
+                renderRecaptcha();
+                clearInterval(interval)
+            }
+        }, 100);
+
+        onBeforeMount(() => {
+            clearInterval(interval);
+        });
+    })
 </script>
 
 <template>
@@ -96,6 +146,9 @@
                     {{isLoading ? "Sending..." : "Send Message"}}
                     <span class="material-symbols-outlined">send</span>
                 </button>
+            </div>
+            <div class="d-flex justify-content-end mt-2">
+                <div ref="recaptchaContainer"></div>
             </div>
         </form>
     </section>
